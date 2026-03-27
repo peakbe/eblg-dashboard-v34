@@ -199,21 +199,33 @@ async function fetchFIDS() {
 function updateFlightsUI(f) {
   const el = document.getElementById("flights-list");
 
-  let html = "<strong>Arrivées</strong><br>";
+  // Si aucune donnée
+  if ((!f.arrivals || f.arrivals.length === 0) && (!f.departures || f.departures.length === 0)) {
+    el.textContent = "Aucun vol FIDS disponible.";
+    return;
+  }
+
+  let html = "";
+
+  // --- ARRIVÉES ---
+  html += "<strong>Arrivées</strong><br>";
   f.arrivals.forEach(v => {
     html += `
       <div class="flight-row">
-        ARR ${v.flightPax} (${v.aircraftType}) – RWY ${v.runway || "?"}<br>
+        ARR ${v.flightPax || v.flight} (${v.aircraftType || "-"}) – RWY ${v.runway || "?"}<br>
         STD/STA: ${format(v.sTx)} – ETD/ETA: ${format(v.eTx)} – ATD/ATA: ${format(v.aTx)}
       </div>
     `;
   });
 
-  html += "<br><strong>Départs</strong><br>";
+  html += "<br>";
+
+  // --- DÉPARTS ---
+  html += "<strong>Départs</strong><br>";
   f.departures.forEach(v => {
     html += `
       <div class="flight-row">
-        DEP ${v.flightPax} (${v.aircraftType}) – RWY ${v.runway || "?"}<br>
+        DEP ${v.flightPax || v.flight} (${v.aircraftType || "-"}) – RWY ${v.runway || "?"}<br>
         STD/STA: ${format(v.sTx)} – ETD/ETA: ${format(v.eTx)} – ATD/ATA: ${format(v.aTx)}
       </div>
     `;
