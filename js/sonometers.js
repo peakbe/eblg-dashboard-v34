@@ -166,3 +166,34 @@ export function initHeatmapToggle(map) {
     // Heatmap initiale
     updateHeatmap(map);
 }
+
+// ------------------------------------------------------
+// Heatmap dynamique basée sur le vent
+// ------------------------------------------------------
+export function updateHeatmapDynamic(map, windDir, windSpeed, runwayHeading) {
+    if (heatLayer) map.removeLayer(heatLayer);
+
+    const diff = Math.abs(windDir - runwayHeading);
+    const angle = Math.min(diff, 360 - diff);
+
+    // Influence du vent
+    const windFactor = Math.min(windSpeed / 20, 1); // max influence à 20 kt
+    const crossFactor = Math.sin(angle * Math.PI / 180);
+
+    const radius = 35 + windFactor * 20 + crossFactor * 10;
+    const blur = 25 + windFactor * 15;
+
+    const points = Object.values(sonometers).map(s => {
+        let weight = 0.2;
+        if (s.marker.options.color === "green") weight = 0.6;
+        if (s.marker.options.color === "red") weight = 1.0;
+        return [s.lat, s.lon, weight];
+    });
+
+    heatLayer = L.heatLayer(points, {
+        radius,
+        blur,
+        maxZoom: 12,
+        minOpacity: 0.3
+    }).addTo(map);
+}
